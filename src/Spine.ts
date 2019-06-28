@@ -35,7 +35,7 @@ namespace pixi_spine {
      */
     export class Spine extends PIXI.Container {
         static globalAutoUpdate: boolean = true;
-        static globalDelayLimit: number  = 0;
+        static globalDelayLimit: number = 0;
 
         tintRgb: ArrayLike<number>;
         spineData: core.SkeletonData;
@@ -50,10 +50,10 @@ namespace pixi_spine {
             super();
 
             if (!spineData) {
-                throw new Error('The spineData param is required.');
+                throw new Error("The spineData param is required.");
             }
 
-            if ((typeof spineData) === "string") {
+            if (typeof spineData === "string") {
                 throw new Error('spineData param cant be string. Please use spine.Spine.fromAtlas("YOUR_RESOURCE_NAME") from now on.');
             }
 
@@ -109,22 +109,18 @@ namespace pixi_spine {
                     slot.currentSprite = sprite;
                     slot.currentSpriteName = spriteName;
                     slotContainer.addChild(sprite);
-                }
-                else if (attachment instanceof core.MeshAttachment) {
+                } else if (attachment instanceof core.MeshAttachment) {
                     let mesh = this.createMesh(slot, attachment);
                     slot.currentMesh = mesh;
                     slot.currentMeshName = attachment.name;
                     slotContainer.addChild(mesh);
-                }
-                else if (attachment instanceof core.ClippingAttachment) {
+                } else if (attachment instanceof core.ClippingAttachment) {
                     this.createGraphics(slot, attachment);
                     slotContainer.addChild(slot.clippingContainer);
                     slotContainer.addChild(slot.currentGraphics);
-                }
-                else {
+                } else {
                     continue;
                 }
-
             }
 
             /**
@@ -155,7 +151,7 @@ namespace pixi_spine {
          * @default true
          */
         get autoUpdate(): boolean {
-            return (this.updateTransform === Spine.prototype.autoUpdateTransform);
+            return this.updateTransform === Spine.prototype.autoUpdateTransform;
         }
 
         set autoUpdate(value: boolean) {
@@ -175,6 +171,7 @@ namespace pixi_spine {
 
         set tint(value: number) {
             this.tintRgb = PIXI.utils.hex2rgb(value, this.tintRgb as any);
+            console.warn(this.tintRgb);
         }
 
         /**
@@ -182,12 +179,11 @@ namespace pixi_spine {
          * that can be overridden with localDelayLimit
          * @return {number} - Maximum processed dt value for the update
          */
-        get delayLimit() : number {
-            let limit = typeof this.localDelayLimit !== "undefined"?
-                this.localDelayLimit: Spine.globalDelayLimit;
+        get delayLimit(): number {
+            let limit = typeof this.localDelayLimit !== "undefined" ? this.localDelayLimit : Spine.globalDelayLimit;
 
             // If limit is 0, this means there is no limit for the delay
-            return limit || Number.MAX_VALUE
+            return limit || Number.MAX_VALUE;
         }
 
         /**
@@ -204,17 +200,16 @@ namespace pixi_spine {
             this.state.apply(this.skeleton);
 
             //check we haven't been destroyed via a spine event callback in state update
-            if(!this.skeleton)
-                return;
+            if (!this.skeleton) return;
 
             this.skeleton.updateWorldTransform();
 
             let slots = this.skeleton.slots;
 
-
             // in case pixi has double tint
             let globalClr = (this as any).color;
-            let light: ArrayLike<number> = null, dark: ArrayLike<number> = null;
+            let light: ArrayLike<number> = null,
+                dark: ArrayLike<number> = null;
             if (globalClr) {
                 light = globalClr.light;
                 dark = globalClr.dark;
@@ -222,7 +217,7 @@ namespace pixi_spine {
                 light = this.tintRgb;
             }
 
-            let thack = PIXI.TransformBase && (this.transformHack() == 1);
+            let thack = PIXI.TransformBase && this.transformHack() == 1;
 
             for (let i = 0, n = slots.length; i < n; i++) {
                 let slot = slots[i];
@@ -254,8 +249,7 @@ namespace pixi_spine {
                             slot.sprites = slot.sprites || {};
                             if (slot.sprites[spriteName] !== undefined) {
                                 slot.sprites[spriteName].visible = true;
-                            }
-                            else {
+                            } else {
                                 let sprite = this.createSprite(slot, attachment, spriteName);
                                 slotContainer.addChild(sprite);
                             }
@@ -313,8 +307,7 @@ namespace pixi_spine {
                         slot.currentSprite.tint = PIXI.utils.rgb2hex(tempRgb);
                     }
                     slot.currentSprite.blendMode = slot.blendMode;
-                }
-                else if (attachment instanceof core.MeshAttachment) {
+                } else if (attachment instanceof core.MeshAttachment) {
                     if (slot.currentSprite) {
                         //TODO: refactor this thing, switch it on and off for container
                         slot.currentSprite.visible = false;
@@ -327,8 +320,7 @@ namespace pixi_spine {
                             (transform as any)._parentID = -1;
                             (transform as any)._worldID = (slotContainer.transform as any)._worldID;
                             slotContainer.transform = transform;
-                        }
-                        else {
+                        } else {
                             slotContainer.localTransform = new PIXI.Matrix();
                             (slotContainer as any).displayObjectUpdateTransform = PIXI.DisplayObject.prototype.updateTransform;
                         }
@@ -343,8 +335,7 @@ namespace pixi_spine {
 
                         if (slot.meshes[meshName] !== undefined) {
                             slot.meshes[meshName].visible = true;
-                        }
-                        else {
+                        } else {
                             let mesh = this.createMesh(slot, attachment);
                             slotContainer.addChild(mesh);
                         }
@@ -355,7 +346,7 @@ namespace pixi_spine {
                     (attachment as core.VertexAttachment).computeWorldVerticesOld(slot, slot.currentMesh.vertices);
                     if (slot.currentMesh.color) {
                         spriteColor = slot.currentMesh.color;
-                    } else if (PIXI.VERSION[0] !== '3') {
+                    } else if (PIXI.VERSION[0] !== "3") {
                         // PIXI version 4
                         // slot.currentMesh.dirty++;
                         //only for PIXI v4
@@ -365,16 +356,14 @@ namespace pixi_spine {
                         tintRgb[2] = light[2] * slot.color.b * attColor.b;
                     }
                     slot.currentMesh.blendMode = slot.blendMode;
-                }
-                else if (attachment instanceof core.ClippingAttachment) {
+                } else if (attachment instanceof core.ClippingAttachment) {
                     if (!slot.currentGraphics) {
                         this.createGraphics(slot, attachment);
                         slotContainer.addChild(slot.clippingContainer);
                         slotContainer.addChild(slot.currentGraphics);
                     }
                     this.updateGraphics(slot, attachment);
-                }
-                else {
+                } else {
                     slotContainer.visible = false;
                     continue;
                 }
@@ -390,7 +379,7 @@ namespace pixi_spine {
                     spriteColor.setLight(
                         light[0] * r0 + dark[0] * (1.0 - r0),
                         light[1] * g0 + dark[1] * (1.0 - g0),
-                        light[2] * b0 + dark[2] * (1.0 - b0),
+                        light[2] * b0 + dark[2] * (1.0 - b0)
                     );
                     if (slot.darkColor) {
                         r0 = slot.darkColor.r;
@@ -404,10 +393,11 @@ namespace pixi_spine {
                     spriteColor.setDark(
                         light[0] * r0 + dark[0] * (1 - r0),
                         light[1] * g0 + dark[1] * (1 - g0),
-                        light[2] * b0 + dark[2] * (1 - b0),
+                        light[2] * b0 + dark[2] * (1 - b0)
                     );
                 }
 
+                window["DEBUG-COL"] = `T: ${dt} R:${slot.color.r} G:${slot.color.g} B:${slot.color.b} A:${slot.color.a} :`;
                 slotContainer.alpha = slot.color.a;
             }
 
@@ -422,7 +412,7 @@ namespace pixi_spine {
                 let slotContainer = this.slotContainers[drawOrder[i].data.index];
 
                 if (!clippingContainer) {
-					//Adding null check as it is possible for slotContainer.parent to be null in the event of a spine being disposed off in its loop callback
+                    //Adding null check as it is possible for slotContainer.parent to be null in the event of a spine being disposed off in its loop callback
                     if (slotContainer.parent !== null && slotContainer.parent !== this) {
                         slotContainer.parent.removeChild(slotContainer);
                         //silend add hack
@@ -438,7 +428,6 @@ namespace pixi_spine {
                     if (clippingAttachment.endSlot == slot.data) {
                         clippingAttachment.endSlot = null;
                     }
-
                 } else {
                     if (clippingContainer) {
                         let c = this.tempClipContainers[i];
@@ -461,14 +450,14 @@ namespace pixi_spine {
                     }
                 }
             }
-        };
+        }
 
         private setSpriteRegion(attachment: core.RegionAttachment, sprite: SpineSprite, region: core.TextureRegion) {
             sprite.region = region;
             sprite.texture = region.texture;
             if (!region.size) {
-                sprite.scale.x = attachment.scaleX * attachment.width / region.originalWidth;
-                sprite.scale.y = -attachment.scaleY * attachment.height / region.originalHeight;
+                sprite.scale.x = (attachment.scaleX * attachment.width) / region.originalWidth;
+                sprite.scale.y = (-attachment.scaleY * attachment.height) / region.originalHeight;
             } else {
                 //hacked!
                 sprite.scale.x = region.size.width / region.originalWidth;
@@ -508,7 +497,7 @@ namespace pixi_spine {
             }
 
             PIXI.Container.prototype.updateTransform.call(this);
-        };
+        }
 
         /**
          * Create a new sprite to be used with core.RegionAttachment
@@ -539,7 +528,7 @@ namespace pixi_spine {
             slot.sprites = slot.sprites || {};
             slot.sprites[defName] = sprite;
             return sprite;
-        };
+        }
 
         /**
          * Creates a Strip from the spine data
@@ -559,7 +548,8 @@ namespace pixi_spine {
                 new Float32Array(attachment.regionUVs.length),
                 new Float32Array(attachment.regionUVs.length),
                 new Uint16Array(attachment.triangles),
-                PIXI.mesh.Mesh.DRAW_MODES.TRIANGLES);
+                PIXI.mesh.Mesh.DRAW_MODES.TRIANGLES
+            );
 
             strip.canvasPadding = 1.5;
 
@@ -571,7 +561,7 @@ namespace pixi_spine {
             slot.meshes = slot.meshes || {};
             slot.meshes[attachment.name] = strip;
             return strip;
-        };
+        }
 
         static clippingPolygon: Array<number> = [];
 
@@ -681,21 +671,22 @@ namespace pixi_spine {
             if (!nameSuffix) {
                 return;
             }
-            const list_d = [], list_n = [];
+            const list_d = [],
+                list_n = [];
             for (let i = 0, len = this.skeleton.slots.length; i < len; i++) {
                 const slot = this.skeleton.slots[i];
                 const name = slot.currentSpriteName || slot.currentMeshName || "";
                 const target = slot.currentSprite || slot.currentMesh;
-                if(name.endsWith(nameSuffix)){
+                if (name.endsWith(nameSuffix)) {
                     target.parentGroup = group;
                     list_n.push(target);
-                }else if(outGroup && target){
+                } else if (outGroup && target) {
                     target.parentGroup = outGroup;
                     list_d.push(target);
                 }
             }
-            return [list_d,list_n];
-        };
+            return [list_d, list_n];
+        }
 
         destroy(options?: PIXI.DestroyOptions | boolean): void {
             for (let i = 0, n = this.skeleton.slots.length; i < n; i++) {
