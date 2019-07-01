@@ -523,6 +523,7 @@ var pixi_spine;
                         color.setFromColor(slot.data.color);
                     color.add((r - color.r) * alpha, (g - color.g) * alpha, (b - color.b) * alpha, (a - color.a) * alpha);
                 }
+                window["DEBUG-COL"] = "new R:" + slot.color.r + " G:" + slot.color.g + " B:" + slot.color.b + "\n A:" + slot.color.a + ", alpha: " + alpha + ", time: " + time + ", blend: " + blend;
             };
             ColorTimeline.ENTRIES = 5;
             ColorTimeline.PREV_TIME = -5;
@@ -1409,8 +1410,10 @@ var pixi_spine;
                     var timelineCount = current.animation.timelines.length;
                     var timelines = current.animation.timelines;
                     if (i == 0 && (mix == 1 || blend == core.MixBlend.add)) {
-                        for (var ii = 0; ii < timelineCount; ii++)
+                        for (var ii = 0; ii < timelineCount; ii++) {
+                            core.Utils.webkit602BugfixHelper(mix, blend);
                             timelines[ii].apply(skeleton, animationLast, animationTime, events, mix, blend, core.MixDirection.in);
+                        }
                     }
                     else {
                         var timelineMode = current.timelineMode;
@@ -1426,6 +1429,7 @@ var pixi_spine;
                             }
                             else {
                                 core.Utils.webkit602BugfixHelper(mix, blend);
+                                console.log("samus", mix, timelineBlend);
                                 timeline.apply(skeleton, animationLast, animationTime, events, mix, timelineBlend, core.MixDirection.in);
                             }
                         }
@@ -1462,8 +1466,10 @@ var pixi_spine;
                 var timelines = from.animation.timelines;
                 var alphaHold = from.alpha * to.interruptAlpha, alphaMix = alphaHold * (1 - mix);
                 if (blend == core.MixBlend.add) {
-                    for (var i = 0; i < timelineCount; i++)
+                    for (var i = 0; i < timelineCount; i++) {
+                        console.log("lucario", alphaHold, alphaMix, mix);
                         timelines[i].apply(skeleton, animationLast, animationTime, events, alphaMix, blend, core.MixDirection.out);
+                    }
                 }
                 else {
                     var timelineMode = from.timelineMode;
@@ -1516,6 +1522,7 @@ var pixi_spine;
                                         direction = core.MixDirection.out;
                                 }
                             }
+                            console.log("Pit", alphaHold, alphaMix, mix);
                             timeline.apply(skeleton, animationLast, animationTime, events, alpha, timelineBlend, direction);
                         }
                     }
@@ -1531,6 +1538,7 @@ var pixi_spine;
                 if (firstFrame)
                     timelinesRotation[i] = 0;
                 if (alpha == 1) {
+                    console.log("mario");
                     timeline.apply(skeleton, 0, time, null, 1, blend, core.MixDirection.in);
                     return;
                 }
@@ -1585,7 +1593,7 @@ var pixi_spine;
                             lastTotal += 360 * core.MathUtils.signum(lastTotal);
                         dir = current;
                     }
-                    total = diff + lastTotal - lastTotal % 360;
+                    total = diff + lastTotal - (lastTotal % 360);
                     if (dir != current)
                         total += 360 * core.MathUtils.signum(lastTotal);
                     timelinesRotation[i] = total;
@@ -2119,18 +2127,12 @@ var pixi_spine;
         var AnimationStateAdapter2 = (function () {
             function AnimationStateAdapter2() {
             }
-            AnimationStateAdapter2.prototype.start = function (entry) {
-            };
-            AnimationStateAdapter2.prototype.interrupt = function (entry) {
-            };
-            AnimationStateAdapter2.prototype.end = function (entry) {
-            };
-            AnimationStateAdapter2.prototype.dispose = function (entry) {
-            };
-            AnimationStateAdapter2.prototype.complete = function (entry) {
-            };
-            AnimationStateAdapter2.prototype.event = function (entry, event) {
-            };
+            AnimationStateAdapter2.prototype.start = function (entry) { };
+            AnimationStateAdapter2.prototype.interrupt = function (entry) { };
+            AnimationStateAdapter2.prototype.end = function (entry) { };
+            AnimationStateAdapter2.prototype.dispose = function (entry) { };
+            AnimationStateAdapter2.prototype.complete = function (entry) { };
+            AnimationStateAdapter2.prototype.event = function (entry, event) { };
             return AnimationStateAdapter2;
         }());
         core.AnimationStateAdapter2 = AnimationStateAdapter2;
@@ -4282,7 +4284,7 @@ var pixi_spine;
             SkeletonJson.prototype.readSkeletonData = function (json) {
                 var scale = this.scale;
                 var skeletonData = new core.SkeletonData();
-                var root = typeof (json) === "string" ? JSON.parse(json) : json;
+                var root = typeof json === "string" ? JSON.parse(json) : json;
                 var skeletonMap = root.skeleton;
                 if (skeletonMap != null) {
                     skeletonData.hash = skeletonMap.hash;
@@ -4638,6 +4640,7 @@ var pixi_spine;
                                 for (var i = 0; i < timelineMap.length; i++) {
                                     var valueMap = timelineMap[i];
                                     var color = new core.Color();
+                                    console.log(valueMap);
                                     color.setFromString(valueMap.color || "ffffffff");
                                     timeline.setFrame(frameIndex, valueMap.time, color.r, color.g, color.b, color.a);
                                     this.readCurve(valueMap, timeline, frameIndex);
@@ -4818,7 +4821,7 @@ var pixi_spine;
                                     throw new Error("Deform attachment not found: " + timelineMap.name);
                                 var weighted = attachment.bones != null;
                                 var vertices = attachment.vertices;
-                                var deformLength = weighted ? vertices.length / 3 * 2 : vertices.length;
+                                var deformLength = weighted ? (vertices.length / 3) * 2 : vertices.length;
                                 var timeline = new core.DeformTimeline(timelineMap.length);
                                 timeline.slotIndex = slotIndex;
                                 timeline.attachment = attachment;
@@ -4918,7 +4921,7 @@ var pixi_spine;
                     return;
                 if (map.curve === "stepped")
                     timeline.setStepped(frameIndex);
-                else if (Object.prototype.toString.call(map.curve) === '[object Array]') {
+                else if (Object.prototype.toString.call(map.curve) === "[object Array]") {
                     var curve = map.curve;
                     timeline.setCurve(frameIndex, curve[0], curve[1], curve[2], curve[3]);
                 }
@@ -7160,7 +7163,6 @@ var pixi_spine;
                     }
                     spriteColor.setDark(light[0] * r0 + dark[0] * (1 - r0), light[1] * g0 + dark[1] * (1 - g0), light[2] * b0 + dark[2] * (1 - b0));
                 }
-                window["DEBUG-COL"] = "T: " + dt + " R:" + slot.color.r + " G:" + slot.color.g + " B:" + slot.color.b + " A:" + slot.color.a + " :";
                 slotContainer.alpha = slot.color.a;
             }
             var drawOrder = this.skeleton.drawOrder;

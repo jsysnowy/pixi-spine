@@ -538,9 +538,9 @@ namespace pixi_spine.core {
                     case MixBlend.setup:
                         slot.color.setFromColor(slot.data.color);
                         return;
-                    case MixBlend.first:
-                        let color = slot.color, setup = slot.data.color;
-                        color.add((setup.r - color.r) * alpha, (setup.g - color.g) * alpha, (setup.b - color.b) * alpha,
+                        case MixBlend.first:
+                            let color = slot.color, setup = slot.data.color;
+                            color.add((setup.r - color.r) * alpha, (setup.g - color.g) * alpha, (setup.b - color.b) * alpha,
                             (setup.a - color.a) * alpha);
                 }
                 return;
@@ -576,6 +576,8 @@ namespace pixi_spine.core {
                 if (blend == MixBlend.setup) color.setFromColor(slot.data.color);
                 color.add((r - color.r) * alpha, (g - color.g) * alpha, (b - color.b) * alpha, (a - color.a) * alpha);
             }
+            window["DEBUG-COL"] = `new R:${slot.color.r} G:${slot.color.g} B:${slot.color.b}\n A:${slot.color.a}, alpha: ${alpha}, time: ${time}, blend: ${blend}`;
+
         }
     }
 

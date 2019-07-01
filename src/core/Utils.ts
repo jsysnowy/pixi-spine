@@ -36,31 +36,31 @@ namespace pixi_spine.core {
     export class IntSet {
         array = new Array<number>();
 
-        add (value: number): boolean {
+        add(value: number): boolean {
             let contains = this.contains(value);
             this.array[value | 0] = value | 0;
             return !contains;
         }
 
-        contains (value: number) {
+        contains(value: number) {
             return this.array[value | 0] != undefined;
         }
 
-        remove (value: number) {
+        remove(value: number) {
             this.array[value | 0] = undefined;
         }
 
-        clear () {
+        clear() {
             this.array.length = 0;
         }
     }
 
     export interface Disposable {
-        dispose (): void;
+        dispose(): void;
     }
 
     export interface Restorable {
-        restore (): void;
+        restore(): void;
     }
 
     export class Color {
@@ -70,10 +70,9 @@ namespace pixi_spine.core {
         public static BLUE = new Color(0, 0, 1, 1);
         public static MAGENTA = new Color(1, 0, 1, 1);
 
-        constructor (public r: number = 0, public g: number = 0, public b: number = 0, public a: number = 0) {
-        }
+        constructor(public r: number = 0, public g: number = 0, public b: number = 0, public a: number = 0) {}
 
-        set (r: number, g: number, b: number, a: number) {
+        set(r: number, g: number, b: number, a: number) {
             this.r = r;
             this.g = g;
             this.b = b;
@@ -82,7 +81,7 @@ namespace pixi_spine.core {
             return this;
         }
 
-        setFromColor (c: Color) {
+        setFromColor(c: Color) {
             this.r = c.r;
             this.g = c.g;
             this.b = c.b;
@@ -90,8 +89,8 @@ namespace pixi_spine.core {
             return this;
         }
 
-        setFromString (hex: string) {
-            hex = hex.charAt(0) == '#' ? hex.substr(1) : hex;
+        setFromString(hex: string) {
+            hex = hex.charAt(0) == "#" ? hex.substr(1) : hex;
             this.r = parseInt(hex.substr(0, 2), 16) / 255.0;
             this.g = parseInt(hex.substr(2, 2), 16) / 255.0;
             this.b = parseInt(hex.substr(4, 2), 16) / 255.0;
@@ -99,7 +98,7 @@ namespace pixi_spine.core {
             return this;
         }
 
-        add (r: number, g: number, b: number, a: number) {
+        add(r: number, g: number, b: number, a: number) {
             this.r += r;
             this.g += g;
             this.b += b;
@@ -108,7 +107,7 @@ namespace pixi_spine.core {
             return this;
         }
 
-        clamp () {
+        clamp() {
             if (this.r < 0) this.r = 0;
             else if (this.r > 1) this.r = 1;
 
@@ -132,38 +131,38 @@ namespace pixi_spine.core {
         static degreesToRadians = MathUtils.PI / 180;
         static degRad = MathUtils.degreesToRadians;
 
-        static clamp (value: number, min: number, max: number) {
+        static clamp(value: number, min: number, max: number) {
             if (value < min) return min;
             if (value > max) return max;
             return value;
         }
 
-        static cosDeg (degrees: number) {
+        static cosDeg(degrees: number) {
             return Math.cos(degrees * MathUtils.degRad);
         }
 
-        static sinDeg (degrees: number) {
+        static sinDeg(degrees: number) {
             return Math.sin(degrees * MathUtils.degRad);
         }
 
-        static signum (value: number): number {
+        static signum(value: number): number {
             return value > 0 ? 1 : value < 0 ? -1 : 0;
         }
 
-        static toInt (x: number) {
+        static toInt(x: number) {
             return x > 0 ? Math.floor(x) : Math.ceil(x);
         }
 
-        static cbrt (x: number) {
-            let y = Math.pow(Math.abs(x), 1/3);
+        static cbrt(x: number) {
+            let y = Math.pow(Math.abs(x), 1 / 3);
             return x < 0 ? -y : y;
         }
 
-        static randomTriangular (min: number, max: number): number {
+        static randomTriangular(min: number, max: number): number {
             return MathUtils.randomTriangularWith(min, max, (min + max) * 0.5);
         }
 
-        static randomTriangularWith (min: number, max: number, mode: number): number {
+        static randomTriangularWith(min: number, max: number, mode: number): number {
             let u = Math.random();
             let d = max - min;
             if (u <= (mode - min) / d) return min + Math.sqrt(u * d * (mode - min));
@@ -172,7 +171,7 @@ namespace pixi_spine.core {
     }
 
     export abstract class Interpolation {
-        protected abstract applyInternal (a: number): number;
+        protected abstract applyInternal(a: number): number;
         apply(start: number, end: number, a: number): number {
             return start + (end - start) * this.applyInternal(a);
         }
@@ -181,37 +180,37 @@ namespace pixi_spine.core {
     export class Pow extends Interpolation {
         protected power = 2;
 
-        constructor (power: number) {
+        constructor(power: number) {
             super();
             this.power = power;
         }
 
-        applyInternal (a: number): number {
+        applyInternal(a: number): number {
             if (a <= 0.5) return Math.pow(a * 2, this.power) / 2;
             return Math.pow((a - 1) * 2, this.power) / (this.power % 2 == 0 ? -2 : 2) + 1;
         }
     }
 
     export class PowOut extends Pow {
-        constructor (power: number) {
+        constructor(power: number) {
             super(power);
         }
 
-        applyInternal (a: number) : number {
+        applyInternal(a: number): number {
             return Math.pow(a - 1, this.power) * (this.power % 2 == 0 ? -1 : 1) + 1;
         }
     }
 
     export class Utils {
-        static SUPPORTS_TYPED_ARRAYS = typeof(Float32Array) !== "undefined";
+        static SUPPORTS_TYPED_ARRAYS = typeof Float32Array !== "undefined";
 
-        static arrayCopy<T> (source: ArrayLike<T>, sourceStart: number, dest: ArrayLike<T>, destStart: number, numElements: number) {
+        static arrayCopy<T>(source: ArrayLike<T>, sourceStart: number, dest: ArrayLike<T>, destStart: number, numElements: number) {
             for (let i = sourceStart, j = destStart; i < sourceStart + numElements; i++, j++) {
                 dest[j] = source[i];
             }
         }
 
-        static setArraySize<T> (array: Array<T>, size: number, value: any = 0): Array<T> {
+        static setArraySize<T>(array: Array<T>, size: number, value: any = 0): Array<T> {
             let oldSize = array.length;
             if (oldSize == size) return array;
             array.length = size;
@@ -221,20 +220,20 @@ namespace pixi_spine.core {
             return array;
         }
 
-        static ensureArrayCapacity<T> (array: Array<T>, size: number, value: any = 0): Array<T> {
+        static ensureArrayCapacity<T>(array: Array<T>, size: number, value: any = 0): Array<T> {
             if (array.length >= size) return array;
             return Utils.setArraySize(array, size, value);
         }
 
-        static newArray<T> (size: number, defaultValue: T): Array<T> {
+        static newArray<T>(size: number, defaultValue: T): Array<T> {
             let array = new Array<T>(size);
             for (let i = 0; i < size; i++) array[i] = defaultValue;
             return array;
         }
 
-        static newFloatArray (size: number): ArrayLike<number> {
+        static newFloatArray(size: number): ArrayLike<number> {
             if (Utils.SUPPORTS_TYPED_ARRAYS) {
-                return new Float32Array(size)
+                return new Float32Array(size);
             } else {
                 let array = new Array<number>(size);
                 for (let i = 0; i < array.length; i++) array[i] = 0;
@@ -242,9 +241,9 @@ namespace pixi_spine.core {
             }
         }
 
-        static newShortArray (size: number): ArrayLike<number> {
+        static newShortArray(size: number): ArrayLike<number> {
             if (Utils.SUPPORTS_TYPED_ARRAYS) {
-                return new Int16Array(size)
+                return new Int16Array(size);
             } else {
                 let array = new Array<number>(size);
                 for (let i = 0; i < array.length; i++) array[i] = 0;
@@ -252,18 +251,16 @@ namespace pixi_spine.core {
             }
         }
 
-        static toFloatArray (array: Array<number>) {
+        static toFloatArray(array: Array<number>) {
             return Utils.SUPPORTS_TYPED_ARRAYS ? new Float32Array(array) : array;
         }
 
-        static toSinglePrecision (value: number) {
+        static toSinglePrecision(value: number) {
             return Utils.SUPPORTS_TYPED_ARRAYS ? Math.fround(value) : value;
         }
 
         // This function is used to fix WebKit 602 specific issue described at http://esotericsoftware.com/forum/iOS-10-disappearing-graphics-10109
-        static webkit602BugfixHelper (alpha: number, blend: MixBlend) {
-
-        }
+        static webkit602BugfixHelper(alpha: number, blend: MixBlend) {}
     }
 
     export class DebugUtils {
@@ -280,48 +277,47 @@ namespace pixi_spine.core {
         private items = new Array<T>();
         private instantiator: () => T;
 
-        constructor (instantiator: () => T) {
+        constructor(instantiator: () => T) {
             this.instantiator = instantiator;
         }
 
-        obtain () {
+        obtain() {
             return this.items.length > 0 ? this.items.pop() : this.instantiator();
         }
 
-        free (item: T) {
+        free(item: T) {
             if ((item as any).reset) (item as any).reset();
             this.items.push(item);
         }
 
-        freeAll (items: ArrayLike<T>) {
+        freeAll(items: ArrayLike<T>) {
             for (let i = 0; i < items.length; i++) {
                 if ((items[i] as any).reset) (items[i] as any).reset();
                 this.items[i] = items[i];
             }
         }
 
-        clear () {
+        clear() {
             this.items.length = 0;
         }
     }
 
     export class Vector2 {
-        constructor (public x = 0, public y = 0) {
-        }
+        constructor(public x = 0, public y = 0) {}
 
-        set (x: number, y: number): Vector2 {
+        set(x: number, y: number): Vector2 {
             this.x = x;
             this.y = y;
             return this;
         }
 
-        length () {
+        length() {
             let x = this.x;
             let y = this.y;
             return Math.sqrt(x * x + y * y);
         }
 
-        normalize () {
+        normalize() {
             let len = this.length();
             if (len != 0) {
                 this.x /= len;
@@ -341,7 +337,7 @@ namespace pixi_spine.core {
         private frameCount = 0;
         private frameTime = 0;
 
-        update () {
+        update() {
             let now = Date.now() / 1000;
             this.delta = now - this.lastTime;
             this.frameTime += this.delta;
@@ -370,23 +366,22 @@ namespace pixi_spine.core {
         mean = 0;
         dirty = true;
 
-        constructor (windowSize: number = 32) {
+        constructor(windowSize: number = 32) {
             this.values = new Array<number>(windowSize);
         }
 
-        hasEnoughData () {
+        hasEnoughData() {
             return this.addedValues >= this.values.length;
         }
 
-        addValue (value: number) {
-            if (this.addedValues < this.values.length)
-                this.addedValues++;
+        addValue(value: number) {
+            if (this.addedValues < this.values.length) this.addedValues++;
             this.values[this.lastValue++] = value;
             if (this.lastValue > this.values.length - 1) this.lastValue = 0;
             this.dirty = true;
         }
 
-        getMean () {
+        getMean() {
             if (this.hasEnoughData()) {
                 if (this.dirty) {
                     let mean = 0;

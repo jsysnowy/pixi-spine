@@ -35,14 +35,14 @@ namespace pixi_spine.core {
         scale = 1;
         private linkedMeshes = new Array<LinkedMesh>();
 
-        constructor (attachmentLoader: AttachmentLoader) {
+        constructor(attachmentLoader: AttachmentLoader) {
             this.attachmentLoader = attachmentLoader;
         }
 
-        readSkeletonData (json: string | any): SkeletonData {
+        readSkeletonData(json: string | any): SkeletonData {
             let scale = this.scale;
             let skeletonData = new SkeletonData();
-            let root = typeof(json) === "string" ? JSON.parse(json) : json;
+            let root = typeof json === "string" ? JSON.parse(json) : json;
 
             // Skeleton
             let skeletonMap = root.skeleton;
@@ -203,7 +203,7 @@ namespace pixi_spine.core {
             // Skins.
             if (root.skins) {
                 for (let skinName in root.skins) {
-                    let skinMap = root.skins[skinName]
+                    let skinMap = root.skins[skinName];
                     let skin = new Skin(skinName);
                     for (let slotName in skinMap) {
                         let slotIndex = skeletonData.findSlotIndex(slotName);
@@ -226,7 +226,7 @@ namespace pixi_spine.core {
                 if (skin == null) throw new Error("Skin not found: " + linkedMesh.skin);
                 let parent = skin.getAttachment(linkedMesh.slotIndex, linkedMesh.parent);
                 if (parent == null) throw new Error("Parent mesh not found: " + linkedMesh.parent);
-                linkedMesh.mesh.setParentMesh(<MeshAttachment> parent);
+                linkedMesh.mesh.setParentMesh(<MeshAttachment>parent);
                 //linkedMesh.mesh.updateUVs();
             }
             this.linkedMeshes.length = 0;
@@ -259,7 +259,7 @@ namespace pixi_spine.core {
             return skeletonData;
         }
 
-        readAttachment (map: any, skin: Skin, slotIndex: number, name: string, skeletonData: SkeletonData): Attachment {
+        readAttachment(map: any, skin: Skin, slotIndex: number, name: string, skeletonData: SkeletonData): Attachment {
             let scale = this.scale;
             name = this.getValue(map, "name", name);
 
@@ -306,7 +306,7 @@ namespace pixi_spine.core {
                     let parent: string = this.getValue(map, "parent", null);
                     if (parent != null) {
                         mesh.inheritDeform = this.getValue(map, "deform", true);
-                        this.linkedMeshes.push(new LinkedMesh(mesh, <string> this.getValue(map, "skin", null), slotIndex, parent));
+                        this.linkedMeshes.push(new LinkedMesh(mesh, <string>this.getValue(map, "skin", null), slotIndex, parent));
                         return mesh;
                     }
 
@@ -329,8 +329,7 @@ namespace pixi_spine.core {
                     this.readVertices(map, path, vertexCount << 1);
 
                     let lengths: Array<number> = Utils.newArray(vertexCount / 3, 0);
-                    for (let i = 0; i < map.lengths.length; i++)
-                        lengths[i] = map.lengths[i] * scale;
+                    for (let i = 0; i < map.lengths.length; i++) lengths[i] = map.lengths[i] * scale;
                     path.lengths = lengths;
 
                     let color: string = this.getValue(map, "color", null);
@@ -370,22 +369,21 @@ namespace pixi_spine.core {
             return null;
         }
 
-        readVertices (map: any, attachment: VertexAttachment, verticesLength: number) {
+        readVertices(map: any, attachment: VertexAttachment, verticesLength: number) {
             let scale = this.scale;
             attachment.worldVerticesLength = verticesLength;
             let vertices: Array<number> = map.vertices;
             if (verticesLength == vertices.length) {
                 let scaledVertices = Utils.toFloatArray(vertices);
                 if (scale != 1) {
-                    for (let i = 0, n = vertices.length; i < n; i++)
-                        scaledVertices[i] *= scale;
+                    for (let i = 0, n = vertices.length; i < n; i++) scaledVertices[i] *= scale;
                 }
                 attachment.vertices = scaledVertices;
                 return;
             }
             let weights = new Array<number>();
             let bones = new Array<number>();
-            for (let i = 0, n = vertices.length; i < n;) {
+            for (let i = 0, n = vertices.length; i < n; ) {
                 let boneCount = vertices[i++];
                 bones.push(boneCount);
                 for (let nn = i + boneCount * 4; i < nn; i += 4) {
@@ -399,7 +397,7 @@ namespace pixi_spine.core {
             attachment.vertices = Utils.toFloatArray(weights);
         }
 
-        readAnimation (map: any, name: string, skeletonData: SkeletonData) {
+        readAnimation(map: any, name: string, skeletonData: SkeletonData) {
             let scale = this.scale;
             let timelines = new Array<Timeline>();
             let duration = 0;
@@ -431,6 +429,7 @@ namespace pixi_spine.core {
                             for (let i = 0; i < timelineMap.length; i++) {
                                 let valueMap = timelineMap[i];
                                 let color = new Color();
+                                console.log(valueMap);
                                 color.setFromString(valueMap.color || "ffffffff");
                                 timeline.setFrame(frameIndex, valueMap.time, color.r, color.g, color.b, color.a);
                                 this.readCurve(valueMap, timeline, frameIndex);
@@ -438,7 +437,6 @@ namespace pixi_spine.core {
                             }
                             timelines.push(timeline);
                             duration = Math.max(duration, timeline.frames[(timeline.getFrameCount() - 1) * ColorTimeline.ENTRIES]);
-
                         } else if (timelineName == "twoColor") {
                             let timeline = new TwoColorTimeline(timelineMap.length);
                             timeline.slotIndex = slotIndex;
@@ -456,9 +454,7 @@ namespace pixi_spine.core {
                             }
                             timelines.push(timeline);
                             duration = Math.max(duration, timeline.frames[(timeline.getFrameCount() - 1) * TwoColorTimeline.ENTRIES]);
-
-                        } else
-                            throw new Error("Invalid timeline type for a slot: " + timelineName + " (" + slotName + ")");
+                        } else throw new Error("Invalid timeline type for a slot: " + timelineName + " (" + slotName + ")");
                     }
                 }
             }
@@ -484,14 +480,11 @@ namespace pixi_spine.core {
                             }
                             timelines.push(timeline);
                             duration = Math.max(duration, timeline.frames[(timeline.getFrameCount() - 1) * RotateTimeline.ENTRIES]);
-
                         } else if (timelineName === "translate" || timelineName === "scale" || timelineName === "shear") {
                             let timeline: TranslateTimeline = null;
                             let timelineScale = 1;
-                            if (timelineName === "scale")
-                                timeline = new ScaleTimeline(timelineMap.length);
-                            else if (timelineName === "shear")
-                                timeline = new ShearTimeline(timelineMap.length);
+                            if (timelineName === "scale") timeline = new ScaleTimeline(timelineMap.length);
+                            else if (timelineName === "shear") timeline = new ShearTimeline(timelineMap.length);
                             else {
                                 timeline = new TranslateTimeline(timelineMap.length);
                                 timelineScale = scale;
@@ -501,16 +494,15 @@ namespace pixi_spine.core {
                             let frameIndex = 0;
                             for (let i = 0; i < timelineMap.length; i++) {
                                 let valueMap = timelineMap[i];
-                                let x = this.getValue(valueMap, "x", 0), y = this.getValue(valueMap, "y", 0);
+                                let x = this.getValue(valueMap, "x", 0),
+                                    y = this.getValue(valueMap, "y", 0);
                                 timeline.setFrame(frameIndex, valueMap.time, x * timelineScale, y * timelineScale);
                                 this.readCurve(valueMap, timeline, frameIndex);
                                 frameIndex++;
                             }
                             timelines.push(timeline);
                             duration = Math.max(duration, timeline.frames[(timeline.getFrameCount() - 1) * TranslateTimeline.ENTRIES]);
-
-                        } else
-                            throw new Error("Invalid timeline type for a bone: " + timelineName + " (" + boneName + ")");
+                        } else throw new Error("Invalid timeline type for a bone: " + timelineName + " (" + boneName + ")");
                     }
                 }
             }
@@ -525,8 +517,14 @@ namespace pixi_spine.core {
                     let frameIndex = 0;
                     for (let i = 0; i < constraintMap.length; i++) {
                         let valueMap = constraintMap[i];
-                        timeline.setFrame(frameIndex, valueMap.time, this.getValue(valueMap, "mix", 1),
-                            this.getValue(valueMap, "bendPositive", true) ? 1 : -1, this.getValue(valueMap, "compress", false), this.getValue(valueMap, "stretch", false));
+                        timeline.setFrame(
+                            frameIndex,
+                            valueMap.time,
+                            this.getValue(valueMap, "mix", 1),
+                            this.getValue(valueMap, "bendPositive", true) ? 1 : -1,
+                            this.getValue(valueMap, "compress", false),
+                            this.getValue(valueMap, "stretch", false)
+                        );
                         this.readCurve(valueMap, timeline, frameIndex);
                         frameIndex++;
                     }
@@ -545,14 +543,19 @@ namespace pixi_spine.core {
                     let frameIndex = 0;
                     for (let i = 0; i < constraintMap.length; i++) {
                         let valueMap = constraintMap[i];
-                        timeline.setFrame(frameIndex, valueMap.time, this.getValue(valueMap, "rotateMix", 1),
-                            this.getValue(valueMap, "translateMix", 1), this.getValue(valueMap, "scaleMix", 1), this.getValue(valueMap, "shearMix", 1));
+                        timeline.setFrame(
+                            frameIndex,
+                            valueMap.time,
+                            this.getValue(valueMap, "rotateMix", 1),
+                            this.getValue(valueMap, "translateMix", 1),
+                            this.getValue(valueMap, "scaleMix", 1),
+                            this.getValue(valueMap, "shearMix", 1)
+                        );
                         this.readCurve(valueMap, timeline, frameIndex);
                         frameIndex++;
                     }
                     timelines.push(timeline);
-                    duration = Math.max(duration,
-                        timeline.frames[(timeline.getFrameCount() - 1) * TransformConstraintTimeline.ENTRIES]);
+                    duration = Math.max(duration, timeline.frames[(timeline.getFrameCount() - 1) * TransformConstraintTimeline.ENTRIES]);
                 }
             }
 
@@ -584,22 +587,30 @@ namespace pixi_spine.core {
                                 frameIndex++;
                             }
                             timelines.push(timeline);
-                            duration = Math.max(duration,
-                                timeline.frames[(timeline.getFrameCount() - 1) * PathConstraintPositionTimeline.ENTRIES]);
+                            duration = Math.max(
+                                duration,
+                                timeline.frames[(timeline.getFrameCount() - 1) * PathConstraintPositionTimeline.ENTRIES]
+                            );
                         } else if (timelineName === "mix") {
                             let timeline = new PathConstraintMixTimeline(timelineMap.length);
                             timeline.pathConstraintIndex = index;
                             let frameIndex = 0;
                             for (let i = 0; i < timelineMap.length; i++) {
                                 let valueMap = timelineMap[i];
-                                timeline.setFrame(frameIndex, valueMap.time, this.getValue(valueMap, "rotateMix", 1),
-                                    this.getValue(valueMap, "translateMix", 1));
+                                timeline.setFrame(
+                                    frameIndex,
+                                    valueMap.time,
+                                    this.getValue(valueMap, "rotateMix", 1),
+                                    this.getValue(valueMap, "translateMix", 1)
+                                );
                                 this.readCurve(valueMap, timeline, frameIndex);
                                 frameIndex++;
                             }
                             timelines.push(timeline);
-                            duration = Math.max(duration,
-                                timeline.frames[(timeline.getFrameCount() - 1) * PathConstraintMixTimeline.ENTRIES]);
+                            duration = Math.max(
+                                duration,
+                                timeline.frames[(timeline.getFrameCount() - 1) * PathConstraintMixTimeline.ENTRIES]
+                            );
                         }
                     }
                 }
@@ -621,7 +632,7 @@ namespace pixi_spine.core {
                             if (attachment == null) throw new Error("Deform attachment not found: " + timelineMap.name);
                             let weighted = attachment.bones != null;
                             let vertices = attachment.vertices;
-                            let deformLength = weighted ? vertices.length / 3 * 2 : vertices.length;
+                            let deformLength = weighted ? (vertices.length / 3) * 2 : vertices.length;
 
                             let timeline = new DeformTimeline(timelineMap.length);
                             timeline.slotIndex = slotIndex;
@@ -632,19 +643,16 @@ namespace pixi_spine.core {
                                 let valueMap = timelineMap[j];
                                 let deform: ArrayLike<number>;
                                 let verticesValue: Array<Number> = this.getValue(valueMap, "vertices", null);
-                                if (verticesValue == null)
-                                    deform = weighted ? Utils.newFloatArray(deformLength) : vertices;
+                                if (verticesValue == null) deform = weighted ? Utils.newFloatArray(deformLength) : vertices;
                                 else {
                                     deform = Utils.newFloatArray(deformLength);
                                     let start = <number>this.getValue(valueMap, "offset", 0);
                                     Utils.arrayCopy(verticesValue, 0, deform, start, verticesValue.length);
                                     if (scale != 1) {
-                                        for (let i = start, n = i + verticesValue.length; i < n; i++)
-                                            deform[i] *= scale;
+                                        for (let i = start, n = i + verticesValue.length; i < n; i++) deform[i] *= scale;
                                     }
                                     if (!weighted) {
-                                        for (let i = 0; i < deformLength; i++)
-                                            deform[i] += vertices[i];
+                                        for (let i = 0; i < deformLength; i++) deform[i] += vertices[i];
                                     }
                                 }
 
@@ -673,23 +681,21 @@ namespace pixi_spine.core {
                     if (offsets != null) {
                         drawOrder = Utils.newArray<number>(slotCount, -1);
                         let unchanged = Utils.newArray<number>(slotCount - offsets.length, 0);
-                        let originalIndex = 0, unchangedIndex = 0;
+                        let originalIndex = 0,
+                            unchangedIndex = 0;
                         for (let i = 0; i < offsets.length; i++) {
                             let offsetMap = offsets[i];
                             let slotIndex = skeletonData.findSlotIndex(offsetMap.slot);
                             if (slotIndex == -1) throw new Error("Slot not found: " + offsetMap.slot);
                             // Collect unchanged items.
-                            while (originalIndex != slotIndex)
-                                unchanged[unchangedIndex++] = originalIndex++;
+                            while (originalIndex != slotIndex) unchanged[unchangedIndex++] = originalIndex++;
                             // Set changed items.
                             drawOrder[originalIndex + offsetMap.offset] = originalIndex++;
                         }
                         // Collect remaining unchanged items.
-                        while (originalIndex < slotCount)
-                            unchanged[unchangedIndex++] = originalIndex++;
+                        while (originalIndex < slotCount) unchanged[unchangedIndex++] = originalIndex++;
                         // Fill in unchanged items.
-                        for (let i = slotCount - 1; i >= 0; i--)
-                            if (drawOrder[i] == -1) drawOrder[i] = unchanged[--unchangedIndex];
+                        for (let i = slotCount - 1; i >= 0; i--) if (drawOrder[i] == -1) drawOrder[i] = unchanged[--unchangedIndex];
                     }
                     timeline.setFrame(frameIndex++, drawOrderMap.time, drawOrder);
                 }
@@ -726,21 +732,20 @@ namespace pixi_spine.core {
             skeletonData.animations.push(new Animation(name, timelines, duration));
         }
 
-        readCurve (map: any, timeline: CurveTimeline, frameIndex: number) {
+        readCurve(map: any, timeline: CurveTimeline, frameIndex: number) {
             if (!map.curve) return;
-            if (map.curve === "stepped")
-                timeline.setStepped(frameIndex);
-            else if (Object.prototype.toString.call(map.curve) === '[object Array]') {
+            if (map.curve === "stepped") timeline.setStepped(frameIndex);
+            else if (Object.prototype.toString.call(map.curve) === "[object Array]") {
                 let curve: Array<number> = map.curve;
                 timeline.setCurve(frameIndex, curve[0], curve[1], curve[2], curve[3]);
             }
         }
 
-        getValue (map: any, prop: string, defaultValue: any) {
+        getValue(map: any, prop: string, defaultValue: any) {
             return map[prop] !== undefined ? map[prop] : defaultValue;
         }
 
-        static blendModeFromString (str: string) {
+        static blendModeFromString(str: string) {
             str = str.toLowerCase();
             if (str == "normal") return BlendMode.Normal;
             if (str == "additive") return BlendMode.Additive;
@@ -749,14 +754,14 @@ namespace pixi_spine.core {
             throw new Error(`Unknown blend mode: ${str}`);
         }
 
-        static positionModeFromString (str: string) {
+        static positionModeFromString(str: string) {
             str = str.toLowerCase();
             if (str == "fixed") return PositionMode.Fixed;
             if (str == "percent") return PositionMode.Percent;
             throw new Error(`Unknown position mode: ${str}`);
         }
 
-        static spacingModeFromString (str: string) {
+        static spacingModeFromString(str: string) {
             str = str.toLowerCase();
             if (str == "length") return SpacingMode.Length;
             if (str == "fixed") return SpacingMode.Fixed;
@@ -764,7 +769,7 @@ namespace pixi_spine.core {
             throw new Error(`Unknown position mode: ${str}`);
         }
 
-        static rotateModeFromString (str: string) {
+        static rotateModeFromString(str: string) {
             str = str.toLowerCase();
             if (str == "tangent") return RotateMode.Tangent;
             if (str == "chain") return RotateMode.Chain;
@@ -784,11 +789,12 @@ namespace pixi_spine.core {
     }
 
     class LinkedMesh {
-        parent: string; skin: string;
+        parent: string;
+        skin: string;
         slotIndex: number;
         mesh: MeshAttachment;
 
-        constructor (mesh: MeshAttachment, skin: string, slotIndex: number, parent: string) {
+        constructor(mesh: MeshAttachment, skin: string, slotIndex: number, parent: string) {
             this.mesh = mesh;
             this.skin = skin;
             this.slotIndex = slotIndex;

@@ -397,7 +397,6 @@ namespace pixi_spine {
                     );
                 }
 
-                window["DEBUG-COL"] = `T: ${dt} R:${slot.color.r} G:${slot.color.g} B:${slot.color.b} A:${slot.color.a} :`;
                 slotContainer.alpha = slot.color.a;
             }
 
